@@ -5,13 +5,10 @@ var router = express.Router();
 var JSFtp = require("jsftp");
 var FTPCredentials = require('../supporting/credentials');
 
-var ftp = new JSFtp(FTPCredentials.creds);
-
 router.get('/', function(req, res, next) {
 	sendResponse(res, 'Welcome', 'Enter a member name above to begin your search', 'result');
 })
 
-/* GET users listing. */
 router.post('/', function(req, res, next) {
 	requestHandler(req, res, next);
 });
@@ -29,8 +26,16 @@ var sendResponse = function(res, programName, programContents, layout) {
 }
 
 var requestHandler = function(req, res, next) {
+
+	var ftp = new JSFtp(FTPCredentials.creds);
+
+
+	ftp.raw.type("a", function(err, data) {
+	})
+
 	var str = ""; // Will store the contents of the file
-	ftp.get(req.body.fileName, function(err, socket) {
+	var inFilename = "'" + req.body.fileName + "'";
+	ftp.get(inFilename, function(err, socket) {
 		if (err) {
 			console.log(err.code);
 			var responseMessage;
@@ -38,9 +43,9 @@ var requestHandler = function(req, res, next) {
 				case 430:
 					responseMessage = 'Username and/or password provided is incorrect. Please updated your credentials.';
 				case 550:
-					responseMessage = 'File ' + req.body.fileName + ' not found. Please try again';
+					responseMessage = '<p>File ' + inFilename + ' not found. Please try again</p> <p><strong>Tip:</strong> If your member path contains a pound sign "#", replace it with %23.</p><p>Example: <br> Before: CMNSTAGE.FMT0.#003950.BTS(FMP025MC)<br />After: CMNSTAGE.FMT0.%23003950.BTS(FMP025MC)</p>';
 			}
-			sendResponse(res, req.body.fileName, responseMessage, 'result');
+			sendResponse(res, inFilename, responseMessage, 'result');
 			return;
 		}
 
@@ -50,12 +55,13 @@ var requestHandler = function(req, res, next) {
 		socket.on("close", function(hadErr) {
 			if (hadErr) {
 				console.error('There was an error retrieving the file.');
-				sendResponse(res, req.body.fileName, 'There was an error retrieving the file.', 'result');
+				sendResponse(res, inFilename, 'There was an error retrieving the file.', 'result');
 				return;
 			}
-			sendResponse(res, req.body.fileName, str, 'result');
+			sendResponse(res, inFilename, str, 'result');
 		});
 		socket.resume();
+
 	});
 }
 
