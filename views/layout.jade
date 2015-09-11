@@ -1,0 +1,24 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/css/bootstrap.min.css')
+  body
+    div.container
+      div.row 
+        div.panel.panel-default.col-md-10
+          div.panel-heading
+            form(action='/viewMember',method='post')
+              div.input-group.pull-right.col-md-6
+                input.form-control(type='text', placeholder='Program Name',name='fileName')
+                span.input-group-btn
+                  button.btn.btn-default(type="submit") Search
+            h1 #{programName}
+          div.panel-body
+            block content
+      div.row
+        div.panel.panel-default.col-md-10
+          | Created by 
+          a(href="mailto:gerharb1@nationwide.com") Brian Gerhards
+  script(src='/js/jquery.js')
+  script(src='/js/bootstrap.min.js')
